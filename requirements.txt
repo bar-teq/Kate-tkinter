@@ -1,0 +1,7 @@
+imaplib
+email
+io
+mailparser
+python-dotenv
+PyPDF2
+reportlab

@@ -2,8 +2,8 @@ import imaplib
 import os
 import email
 import time
-import subprocess
 import io
+import subprocess
 from email import policy
 from tkinter import *
 import mailparser
@@ -15,13 +15,28 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+
 pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
 load_dotenv()
 attachment_dir = os.getenv('ATTACHMENT_DIR')
 labels_dir = os.getenv('LABEL_DIR')
 id_list = []
 mail = 0
-open("items.txt", "w").close()
+root = Tk()
+# root.geometry('500x500')
+root.columnconfigure(0, minsize=10)
+root.columnconfigure(1, minsize=40)
+root.columnconfigure(2, minsize=10)
+root.columnconfigure(3, minsize=40)
+root.columnconfigure(4, minsize=10)
+
+root.rowconfigure(0, minsize=10)
+root.rowconfigure(1, minsize=40)
+root.rowconfigure(2, minsize=40)
+root.rowconfigure(3, minsize=40)
+root.rowconfigure(4, minsize=40)
+root.rowconfigure(5, minsize=40)
+root.rowconfigure(6, minsize=10)
 
 
 def how_many_new_emails():
@@ -50,9 +65,9 @@ def how_many_new_emails():
 def show_items():
     if len(id_list) == 0:
         return "brak"
+    listbox_list_of_items.delete(0, 99)
     for i in range(int(id_list[-1]), int(id_list[0])-1, -1):
         _, data = mail.fetch(str(i), '(RFC822)')
-        my_text.delete(0, 99)
         raw = email.message_from_bytes(data[0][1])
         mailp = mailparser.parse_from_bytes(data[0][1])
         for response_part in data:
@@ -63,22 +78,23 @@ def show_items():
                 crop = temat[0:-46]
                 lista = crop.split(',')
                 with open('items.txt', 'a', encoding="UTF-8") as file:
-                    file.write(f"{besbefore.lstrip()} \n***************** \n")
-                    my_text.insert(0, " ")
-                    my_text.insert(0, f"{besbefore.lstrip()}")
+                    # file.write(f"{besbefore.lstrip()} \n***************** \n")
+                    listbox_list_of_items.insert(0, " ")
+                    listbox_list_of_items.insert(0, f"{besbefore.lstrip()}")
 
                 for item in lista:
                     with open('items.txt', 'a', encoding="UTF-8") as file:
-                        file.write(f"{item.lstrip()} \n")
-                        my_text.insert(0, f" * {item.lstrip()}")
+                        # file.write(f"{item.lstrip()} \n")
+                        listbox_list_of_items.insert(0, f" * {item.lstrip()}")
 
                 with open('items.txt', 'a', encoding="UTF-8") as file:
-                    file.write(f"\nPACZKA {i} \n")
-                    my_text.insert(0, f"PACZKA {i}")
+                    # file.write(f"\nPACZKA {i} \n")
+                    listbox_list_of_items.insert(0, f"PACZKA {i}")
         mail.store(str(i), '-FLAGS', '(\Seen)')
 
 
 def print_all():
+    files_deleting()
     if len(id_list) == 0:
         return "brak"
     for i in range(int(id_list[-1]), int(id_list[0])-1, -1):
@@ -130,7 +146,13 @@ def print_all():
                     outputStream = open(filePath_lab, "wb")
                     output.write(outputStream)
                     outputStream.close()
-                time.sleep(5)
+    for f in os.listdir(labels_dir):
+        filePath = os.path.join(labels_dir, f)
+        subprocess.call(f'PDFtoPrinter.exe /s {filePath}', shell=True)
+        # os.system(f'{filePath} print')
+        # os.startfile(filePath, "print")
+        time.sleep(1)
+        # command = "{} {}".format('PDFtoPrinter.exe','report.pdf')
 
 
 def files_deleting():
@@ -148,20 +170,51 @@ def files_deleting():
 
 
 def refresh():
-    label1 = Label(root, text=f" Masz {how_many_new_emails()} nowych etykiet")
-    label1.grid(row=0, column=0)
+    # label1 = Label(root, text=f" Masz {how_many_new_emails()} nowych etykiet")
+    # label1.grid(row=0, column=0)
+    label_how_many_new_emails = Label(
+        root, text=f" Nowych etykiet: {how_many_new_emails()}")
+    label_how_many_new_emails.grid(row=1, column=3)
 
 
-files_deleting()
-root = Tk()
-root.title('KATE')
-my_text = Listbox(root, width=40, height=20)
-my_text.grid(row=2, column=0)
-label1 = Label(root, text=f" Masz {how_many_new_emails()} nowych etykiet")
-label1.grid(row=0, column=0)
-show_items()
-button = Button(root, text="Drukuj wszystkie!", command=lambda: print_all())
-button.grid(row=1, column=0)
-button1 = Button(root, text="odswiez", command=lambda: refresh())
-button1.grid(row=3, column=0)
+button_printall = Button(root, width=40, padx=0,
+                         pady=40, text="DRUKUJ WSZYSTKO", command=lambda: print_all())
+button_refresh = Button(root, width=40, padx=0, pady=0,
+                        text="Odswież listę", command=lambda: refresh())
+button_schedule = Button(root, width=10, padx=0, pady=0, text="Grafik?")
+listbox_list_of_items = Listbox(root, width=40, height=30)
+label_how_many_new_emails = Label(
+    root, text=f" Nowych etykiet: {how_many_new_emails()}")
+listbox_list_of_items.grid(row=1, column=1, rowspan=5)
+button_printall.grid(row=3, column=3, sticky=NS)
+label_how_many_new_emails.grid(row=1, column=3)
+button_refresh.grid(row=4, column=3, sticky=N)
+button_schedule.grid(row=5, column=3)
+label_bottom = Label(root, text="by carmel")
+label_bottom.grid(row=6, column=2, columnspan=3, sticky=E)
+
+# E.grid(row=0, column=0)
+# F.grid(row=1, column=0)
+
+
+# def print_days():
+#     # lista = e.get()
+#     # days = lista.split(',')
+#     mylabel = Label(root, text=E.get())
+#     mylabel.pack()
+#     mylabel2 = Label(root, text=F.get())
+#     mylabel2.pack()
+
+
+# files_deleting()
+
+# my_text = Listbox(root, width=40, height=20)
+# my_text.grid(row=2, column=0)
+# label1 = Label(root, text=f" Masz {how_many_new_emails()} nowych etykiet")
+# label1.grid(row=0, column=0)
+
+# button = Button(root, text="Drukuj wszystkie!", command=lambda: print_all())
+# button.grid(row=1, column=0)
+# button1 = Button(root, text="odswiez", command=lambda: refresh())
+# button1.grid(row=3, column=0)
 root.mainloop()
