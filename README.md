@@ -2,10 +2,16 @@
 
 WORK IN PROGRESS
 
-beter version of vinted.py from https://github.com/bar-teq/vinted
+Used packages: 
+    email
+    io
+    mailparser
+    python-dotenv
+    PyPDF2
+    reportlab
 
-* gui showing how many new labels is on email, printing from gui
+Mainkate.py - GUI, shows how many new labels is on eamail, shows items and can send all labels to printer.
 
-* better formating in Canvas + all items from order printed on label
+backgroundscript.py - can work in bacground, checks every minute for new labels, ads list of items under the label and sends them to printer.
 
-* ...
+rename .env.example to .env and change variables inside.

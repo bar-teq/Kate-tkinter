@@ -71,22 +71,18 @@ def Main_loop():
         can = canvas.Canvas(packet, pagesize=A4, encrypt=None)
         can.setFont(psfontname="DejaVuSans", size=12, leading=None)
         besbefore = title[-24:]
-        # print(besbefore)
         crop = title[0:-46]
-        # print(crop)
         lista = crop.split(',')
         lista.reverse()
         x = 120
 
         for i in lista:
-            # print(i.lstrip())
             can.drawString(10, x, i.lstrip())
             x += 20
         can.setFont(psfontname="DejaVuSans", size=10, leading=None)
         can.drawString(10, 90, f"{besbefore}")
 
         can.save()
-        # print("----------------------------")
         packet.seek(0)
         new_pdf = PdfFileReader(packet)
         with open(filePath_att, "rb") as f:
@@ -100,9 +96,6 @@ def Main_loop():
             outputStream.close()
 
     if len(id_list) == 0:
-        # print('Brak nowych etykiet')
-        # with open('d:/python/vinted/log/log.txt', 'a') as file:
-        #     file.write(f"{now} Brak nowych etykiet \n")
         pass
     else:
 
@@ -119,34 +112,15 @@ def Main_loop():
                     temat = mailp.subject
                     fileName = get_attachments(msg)
                     change_pdf(f"{temat}", f"{fileName}")
-                    # pdf_count += 1
-                    # with open('d:/python/vinted/log/log.txt', 'a') as file:
-                    #     file.write(f"{now} {temat} \n")
             mail.store(str(i), '+X-GM-LABELS', '\\Trash')
             mail.expunge()
 
-        # print()
-        # print("-------------------------------------------")
-        # print(f"Nowych Etykiet: {pdf_count}")
-        # print("-------------------------------------------")
-        # print()
-
         dir_old = 'D:/python/vinted/tt'
         dir = 'D:/python/vinted/zrobione'
-        # printed = 0
         for f in os.listdir(labels_dir):
             filePath = os.path.join(labels_dir, f)
             subprocess.call(f'PDFtoPrinter.exe /s {filePath}', shell=True)
             time.sleep(1)
-
-        # print()
-        # print("-------------------------------------------")
-        # print(f"Wydykowano Etykiet: {printed}")
-        # print("-------------------------------------------")
-        # print()
-        # with open('d:/python/vinted/log/log.txt', 'a') as file:
-        #     file.write(
-        #         f"----------------------\n{now} Wydrukowano {printed} \n----------------------\n")
 while True:
     Main_loop()
     time.sleep(60)
